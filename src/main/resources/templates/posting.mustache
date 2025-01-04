@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 삽입 및 텍스트 작성</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .editor-container {
+            width: 70%;
+            max-width: 1000px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .toolbar {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toolbar button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .toolbar button:hover {
+            background-color: #0056b3;
+        }
+        #editor {
+            min-height: 300px;
+            max-height: 400px; /* 최대 높이 */
+            overflow-y: auto; /* 세로 스크롤 */
+            outline: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: text;
+        }
+        #editor img {
+            width: 300px; /* 기본 너비 */
+            height: auto; /* 기본 높이 */
+            border: 1px solid #ccc;
+            margin: 5px 0;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .button-group button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button-group button:hover {
+            background-color: #5a6268;
+        }
+        .button-group .submit-btn {
+            background-color: #007BFF;
+        }
+        .button-group .submit-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="editor-container">
+    <!-- 제목 입력 -->
+    <div class="toolbar">
+        <input type="text" id="title" placeholder="제목을 입력하세요" style="width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <button type="button" onclick="addImage()">이미지 추가</button>
+    </div>
+
+    <!-- 글쓰기 영역 -->
+    <div id="editor" aria-placeholder="글을 작성하거나 이미지를 삽입하세요." contenteditable="true">
+
+    </div>
+
+    <!-- 폼 -->
+    <form id="submitForm" method="post" action="/submit">
+        <textarea name="title" id="formTitle" style="display: none;"></textarea>
+        <textarea name="content" id="formContent" style="display: none;"></textarea>
+        <div class="button-group">
+            <button type="button" onclick="cancelForm()">취소</button>
+            <button type="submit" class="submit-btn" onclick="prepareForm()">등록</button>
+        </div>
+    </form>
+</div>
+
+<input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="insertImage(event)">
+
+<script>
+    // 이미지 추가 버튼 클릭 시 파일 선택
+    function addImage() {
+        document.getElementById('imageInput').click();
+    }
+
+    // 선택한 이미지를 에디터에 삽입
+    function insertImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = "300px"; // 기본 너비
+                img.style.height = "auto"; // 기본 높이
+
+                const editor = document.getElementById('editor');
+                editor.appendChild(img);
+
+                // 이미지 삽입 후 커서를 이미지 바로 뒤로 이동
+                moveCursorToEnd(img);
+
+                // 동일 이미지도 추가 가능하도록 input 값 초기화
+                document.getElementById('imageInput').value = '';
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // 커서를 특정 노드 뒤로 이동
+    function moveCursorToEnd(element) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+
+        // 이미지 뒤에 빈 텍스트 노드 추가
+        const editor = document.getElementById('editor');
+        const emptyTextNode = document.createTextNode('\u200B'); // Zero-width space
+        editor.insertBefore(emptyTextNode, element.nextSibling);
+
+        // 커서를 빈 텍스트 노드로 이동
+        range.setStartAfter(element);
+        range.collapse(true);
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // 취소 버튼 동작
+    function cancelForm() {
+        if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
+            document.getElementById("title").value = "";
+            document.getElementById("editor").innerHTML = "글을 작성하거나 이미지를 삽입하세요.";
+        }
+    }
+
+    // 폼 데이터 준비
+    function prepareForm() {
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("editor").innerHTML;
+
+        if (title.trim() === "" || content.trim() === "") {
+            alert("제목과 내용을 모두 입력해주세요.");
+            event.preventDefault(); // 폼 제출 중지
+            return;
+        }
+
+        // 폼 데이터에 값 추가
+        document.getElementById("formTitle").value = title;
+        document.getElementById("formContent").value = content;
+    }
+</script>
+</body>
+</html>
