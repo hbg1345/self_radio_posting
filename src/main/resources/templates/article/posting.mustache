@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{category}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .editor-container {
+            width: 70%;
+            max-width: 1000px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .toolbar {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toolbar button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .toolbar button:hover {
+            background-color: #0056b3;
+        }
+        #editor {
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            outline: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: text;
+        }
+        #editor img {
+            width: 300px;
+            height: auto;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .button-group button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button-group button:hover {
+            background-color: #5a6268;
+        }
+        .button-group .submit-btn {
+            background-color: #007BFF;
+        }
+        .button-group .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        a {
+            text-decoration-line: none;
+        /*   text-decoration-line: underline; */
+        /*   text-decoration-line: overline; */
+        /*   text-decoration-line: line-through; */
+        /*   text-decoration-line: underline line-through overline; */
+        }
+        a:link {
+        color : black;
+        }
+        a:visited {
+          color : black;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 70%; max-width: 1000px; margin: 0 auto;">
+    <a href="/test/{{category}}" style="display: block; margin-bottom: 40px; font-size: 18px;">
+        {{category}}
+    </a>
+
+    <div class="editor-container">
+        <!-- 닉네임 입력 -->
+        <div class="toolbar">
+            <input type="text" id="writer" name="writer" placeholder="닉네임을 입력하세요" style="width: 40%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+
+        <!-- 제목 입력 -->
+        <div class="toolbar">
+            <input type="text" id="title" placeholder="제목을 입력하세요" style="width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+            <button type="button" onclick="addImage()">이미지 추가</button>
+        </div>
+
+        <!-- 글쓰기 영역 -->
+        <div id="editor" contenteditable="true" aria-placeholder="글을 작성하거나 이미지를 삽입하세요."></div>
+
+        <!-- 폼 -->
+        <form id="submitForm" method="post" enctype="multipart/form-data">
+            <textarea name="title" id="formTitle" style="display: none;"></textarea>
+            <textarea name="writer" id="formWriter" style="display: none;"></textarea>
+            <textarea name="content" id="formContent" style="display: none;"></textarea>
+            <input type="file" id="imageFiles" name="images" multiple style="display: none;">
+            <div class="button-group">
+                <button type="button" onclick="cancelForm()">취소</button>
+                <button type="button" class="submit-btn" onclick="prepareForm()">등록</button>
+            </div>
+        </form>
+    </div>
+</div>
+<input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="insertImage(event)">
+
+<script>
+    const uploadedFiles = []; // 업로드할 이미지 파일 목록
+
+    function addImage() {
+        document.getElementById('imageInput').click();
+    }
+
+    function insertImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const fileId = Date.now(); // 고유 ID 생성 (timestamp)
+
+            // 업로드 목록에 파일 추가
+            uploadedFiles.push({ id: fileId, file: file });
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = "300px";
+                img.style.height = "auto";
+                img.setAttribute("data-file-id", fileId); // 고유 ID 저장
+                img.setAttribute("data-file-name", file.name); // 파일 이름 저장
+
+                const editor = document.getElementById("editor");
+                editor.appendChild(img);
+                moveCursorToEnd(img);
+
+                document.getElementById('imageInput').value = ''; // 초기화
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function moveCursorToEnd(element) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.setStartAfter(element);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    function cancelForm() {
+        if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
+            //document.getElementById("title").value = "";
+            //document.getElementById("writer").value = "";
+            //document.getElementById("editor").innerHTML = "";
+            //uploadedFiles.length = 0; // 초기화
+            window.location.href = "/test/{{category}}"
+        }
+    }
+
+    function prepareForm() {
+        const title = document.getElementById("title").value;
+        const writer = document.getElementById("writer").value;
+        const contentElement = document.getElementById("editor");
+        const content = contentElement.innerHTML;
+
+        if (!title.trim() || !writer.trim() || !content.trim()) {
+            alert("닉네임, 제목, 내용을 모두 입력해주세요.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("writer", writer);
+        formData.append("content", content);
+
+        // 업로드된 파일 추가
+        uploadedFiles.forEach(item => {
+            formData.append("images", item.file);
+        });
+
+        fetch('/submit/{{category}}', {
+            method: 'POST',
+            body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json(); // 서버에서 JSON 응답 처리
+            })
+            .then(data => {
+                alert(data.message); // 서버에서 받은 메시지로 알림 표시
+                window.location.href = data.redirectUrl; // 리디렉션 수행
+            })
+            .catch(error => {
+                console.error("Error:", error.message);
+                alert("등록에 실패했습니다."); // 실패 시 사용자 알림
+            });
+    }
+</script>
+</body>
+</html>

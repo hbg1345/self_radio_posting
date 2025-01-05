@@ -18,11 +18,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class S3FileManager {
+public class S3FileService {
     private final AmazonS3 amazonS3;
     private final String bucket;
 
-    public S3FileManager(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket}") String bucket) {
+    public S3FileService(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket}") String bucket) {
         this.amazonS3 = amazonS3;
         this.bucket = bucket;
     }
@@ -40,6 +40,7 @@ public class S3FileManager {
 
     private String makeUniqueFileName(MultipartFile file){
         String originalFileName = file.getOriginalFilename();
+        log.info("ori name is " + originalFileName);
         String uuid = UUID.randomUUID().toString();
         return uuid + "_" + originalFileName.replaceAll("\\s", "_");
     }
@@ -63,13 +64,12 @@ public class S3FileManager {
     private String putS3(File uploadFile, String fileName) {
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
+        log.info("file name is " + fileName);
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
     private void freeGarbageFile(File targetFile) {
-        if (targetFile.delete()) {
-            log.info("파일 삭제 성공");
-        } else {
+        if (!targetFile.delete()){
             log.info("파일 삭제 실패");
         }
     }

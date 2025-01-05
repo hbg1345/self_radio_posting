@@ -1,0 +1,44 @@
+{{>layouts/header}}
+{{>layouts/categories}}
+<div class="main-container">
+    <div class="gallery-header">
+        <h2>{{category}}</h2>
+    </div>
+    <div class="tab-menu">
+        <div class="tab-buttons">
+            <button class="active">전체포스팅</button>
+            <button>인기포스팅</button>
+            <button>공지사항</button>
+        </div>
+        <a href="/post/{{category}}" class="write-button">글쓰기</a>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>글쓴이</th>
+            <th>작성일</th>
+            <th>조회</th>
+            <th>추천</th>
+        </tr>
+        </thead>
+        {{#articleList}}
+        <tbody>
+        <tr>
+            <td>{{id}}</td>
+            <td><a href="/article/show/{{id}}">{{title}}</a></td>
+            <td>{{writer}}</td>
+            <td>24.12.30</td>
+            <td>395</td>
+            <td>0</td>
+        </tr>
+        </tbody>
+        {{/articleList}}
+    </table>
+</div>
+<footer>
+    <p>© 2025 Your Website. All rights reserved.</p>
+</footer>
+</body>
+</html>
