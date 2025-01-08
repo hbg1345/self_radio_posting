@@ -1,6 +1,6 @@
 {{>layouts/header}}
 {{>layouts/categories}}
-<div class="main-container">
+<div class="main-container" style="height: 100vh; overflow-y: auto;">
     <!-- 카테고리 제목 -->
     <div class="gallery-header">
         <h2>{{article.category}}</h2>
@@ -18,12 +18,12 @@
         <div class="article-content">
             {{{article.content}}} <!-- HTML 내용 렌더링 -->
         </div>
-
     </div>
 </div>
 
 <footer>
     <p>© 2025 Your Website. All rights reserved.</p>
 </footer>
+
 </body>
 </html>

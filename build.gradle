@@ -21,8 +21,18 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
+	// video
+	implementation 'org.jcodec:jcodec:0.2.5'
+	implementation 'org.jcodec:jcodec-javase:0.2.5'
+
+	// html parser
+	implementation 'org.jsoup:jsoup:1.18.3'
+
 	// aws s3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// google tts api
+	implementation 'com.google.cloud:google-cloud-texttospeech:2.54.0'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-mustache'
@@ -30,6 +40,8 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
 }
 
 tasks.named('test') {

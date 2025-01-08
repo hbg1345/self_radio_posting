@@ -1,138 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{category}}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-        }
-        .editor-container {
-            width: 70%;
-            max-width: 1000px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .toolbar {
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .toolbar button {
-            padding: 8px 12px;
-            border: none;
-            background-color: #007BFF;
-            color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toolbar button:hover {
-            background-color: #0056b3;
-        }
-        #editor {
-            min-height: 300px;
-            max-height: 400px;
-            overflow-y: auto;
-            outline: none;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: text;
-        }
-        #editor img {
-            width: 300px;
-            height: auto;
-            border: 1px solid #ccc;
-            margin: 5px 0;
-        }
-        .button-group {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .button-group button {
-            padding: 8px 12px;
-            border: none;
-            background-color: #6c757d;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .button-group button:hover {
-            background-color: #5a6268;
-        }
-        .button-group .submit-btn {
-            background-color: #007BFF;
-        }
-        .button-group .submit-btn:hover {
-            background-color: #0056b3;
-        }
-        a {
-            text-decoration-line: none;
-        /*   text-decoration-line: underline; */
-        /*   text-decoration-line: overline; */
-        /*   text-decoration-line: line-through; */
-        /*   text-decoration-line: underline line-through overline; */
-        }
-        a:link {
-        color : black;
-        }
-        a:visited {
-          color : black;
-        }
-    </style>
-</head>
-<body>
-<div style="width: 70%; max-width: 1000px; margin: 0 auto;">
-    <a href="/test/{{category}}" style="display: block; margin-bottom: 40px; font-size: 18px;">
-        {{category}}
-    </a>
-
-    <div class="editor-container">
+{{>layouts/header}}
+{{>layouts/categories}}
+<div class="main-container">
+    <!-- 카테고리 제목 -->
+    <div class="gallery-header">
+        <h2>{{category}}</h2>
+    </div>
+    <div style="max-width: 1000px; margin: 20px auto; font-family: Arial, sans-serif;">
         <!-- 닉네임 입력 -->
-        <div class="toolbar">
-            <input type="text" id="writer" name="writer" placeholder="닉네임을 입력하세요" style="width: 40%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="writer" name="writer" placeholder="닉네임을 입력하세요"
+                   style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
 
         <!-- 제목 입력 -->
-        <div class="toolbar">
-            <input type="text" id="title" placeholder="제목을 입력하세요" style="width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
-            <button type="button" onclick="addImage()">이미지 추가</button>
+        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="title" name="title" placeholder="제목을 입력하세요"
+                   style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <button type="button" onclick="addImage()"
+                    style="padding: 10px 15px;
+                           background-color: #007BFF;
+                           color: white;
+                           border: none;
+                           border-radius: 5px;
+                           cursor: pointer;
+                           font-size: 14px;">
+                이미지 추가
+            </button>
         </div>
 
         <!-- 글쓰기 영역 -->
-        <div id="editor" contenteditable="true" aria-placeholder="글을 작성하거나 이미지를 삽입하세요."></div>
+        <div id="editor" contenteditable="true" aria-placeholder="글을 작성하거나 이미지를 삽입하세요."
+             style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; min-height: 300px; max-height: 400px; overflow-y: auto; margin-bottom: 20px; background-color: #ffffff;">
+        </div>
 
-        <!-- 폼 -->
-        <form id="submitForm" method="post" enctype="multipart/form-data">
-            <textarea name="title" id="formTitle" style="display: none;"></textarea>
-            <textarea name="writer" id="formWriter" style="display: none;"></textarea>
-            <textarea name="content" id="formContent" style="display: none;"></textarea>
-            <input type="file" id="imageFiles" name="images" multiple style="display: none;">
-            <div class="button-group">
-                <button type="button" onclick="cancelForm()">취소</button>
-                <button type="button" class="submit-btn" onclick="prepareForm()">등록</button>
-            </div>
-        </form>
+        <!-- 숨겨진 파일 입력 -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="insertImage(event)">
+
+        <!-- 폼 버튼 -->
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="cancelForm()"
+                    style="padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; cursor: pointer;">
+                취소
+            </button>
+            <button type="button" class="submit-btn" onclick="prepareForm()"
+                    style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;">
+                등록
+            </button>
+        </div>
     </div>
 </div>
-<input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="insertImage(event)">
-
 <script>
-    const uploadedFiles = []; // 업로드할 이미지 파일 목록
+    const uploadedFiles = []; // 업로드한 이미지 파일 목록
 
     function addImage() {
         document.getElementById('imageInput').click();
@@ -141,7 +59,7 @@
     function insertImage(event) {
         const file = event.target.files[0];
         if (file) {
-            const fileId = Date.now(); // 고유 ID 생성 (timestamp)
+            const fileId = Date.now(); // 고유 ID 생성
 
             // 업로드 목록에 파일 추가
             uploadedFiles.push({ id: fileId, file: file });
@@ -156,9 +74,13 @@
                 img.setAttribute("data-file-name", file.name); // 파일 이름 저장
 
                 const editor = document.getElementById("editor");
+                if (!editor) {
+                    console.error("Editor element not found!");
+                    return;
+                }
                 editor.appendChild(img);
-                moveCursorToEnd(img);
 
+                moveCursorToEnd(img);
                 document.getElementById('imageInput').value = ''; // 초기화
             };
 
@@ -175,23 +97,33 @@
         selection.addRange(range);
     }
 
+    // 에디터에서 백스페이스로 이미지 삭제 시 동기화
+    document.getElementById("editor").addEventListener("input", () => {
+        const editor = document.getElementById("editor");
+        const currentImages = Array.from(editor.querySelectorAll("img"));
+
+        // `uploadedFiles`에서 현재 DOM에 없는 이미지 제거
+        uploadedFiles.forEach((item, index) => {
+            const isStillInEditor = currentImages.some(img => img.getAttribute("data-file-id") === String(item.id));
+            if (!isStillInEditor) {
+                uploadedFiles.splice(index, 1); // 배열에서 제거
+            }
+        });
+    });
+
     function cancelForm() {
         if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
-            //document.getElementById("title").value = "";
-            //document.getElementById("writer").value = "";
-            //document.getElementById("editor").innerHTML = "";
-            //uploadedFiles.length = 0; // 초기화
-            window.location.href = "/test/{{category}}"
+            window.location.href = "/test/{{category}}";
         }
     }
 
     function prepareForm() {
-        const title = document.getElementById("title").value;
-        const writer = document.getElementById("writer").value;
+        const title = document.getElementById("title").value.trim();
+        const writer = document.getElementById("writer").value.trim();
         const contentElement = document.getElementById("editor");
-        const content = contentElement.innerHTML;
+        const content = contentElement.innerHTML.trim();
 
-        if (!title.trim() || !writer.trim() || !content.trim()) {
+        if (!title || !writer || !content) {
             alert("닉네임, 제목, 내용을 모두 입력해주세요.");
             return;
         }
@@ -209,20 +141,20 @@
         fetch('/submit/{{category}}', {
             method: 'POST',
             body: formData
-            })
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                return response.json(); // 서버에서 JSON 응답 처리
+                return response.json();
             })
             .then(data => {
-                alert(data.message); // 서버에서 받은 메시지로 알림 표시
-                window.location.href = data.redirectUrl; // 리디렉션 수행
+                alert(data.message);
+                window.location.href = data.redirectUrl;
             })
             .catch(error => {
                 console.error("Error:", error.message);
-                alert("등록에 실패했습니다."); // 실패 시 사용자 알림
+                alert("등록에 실패했습니다.");
             });
     }
 </script>

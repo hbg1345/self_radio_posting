@@ -4,10 +4,12 @@ import com.example.selfRadioPosting.Entity.Article;
 import com.example.selfRadioPosting.dto.ArticleDto;
 import com.example.selfRadioPosting.service.ArticleService;
 import com.example.selfRadioPosting.service.S3FileService;
+import com.example.selfRadioPosting.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,10 +50,12 @@ public class ArticleController {
     }
 
     @PostMapping("/submit/{category}")
+    @Transactional
     public ResponseEntity<Map<String, String>> submit(
             @PathVariable String category,
             @ModelAttribute ArticleDto articleDto,
             @RequestParam(value = "images", required = false) List<MultipartFile> images) throws IOException {
+
         ArrayList<String> urls = new ArrayList<>();
         if (images != null) {
             for (MultipartFile image : images) {
@@ -61,7 +65,9 @@ public class ArticleController {
                 }
             }
         }
-        articleService.submit(articleDto, urls);
+        articleService.submit(articleDto, urls, images);
+
+
         Map<String, String> response = new HashMap<>();
         response.put("message", "글이 성공적으로 등록되었습니다!");
         response.put("redirectUrl", "/article/test/" + category);
