@@ -1,5 +1,11 @@
 {{>layouts/header}}
 {{>layouts/categories}}
+<style>
+    #editor img {
+        max-width: 100%; /* 에디터 너비를 넘지 않음 */
+        height: auto;    /* 비율 유지 */
+    }
+</style>
 <div class="main-container">
     <!-- 카테고리 제목 -->
     <div class="gallery-header">
@@ -8,13 +14,15 @@
     <div style="max-width: 1000px; margin: 20px auto; font-family: Arial, sans-serif;">
         <!-- 닉네임 입력 -->
         <div style="margin-bottom: 20px;">
-            <input type="text" id="writer" name="writer" placeholder="닉네임을 입력하세요"
+            <input type="text" id="writer" name="writer" placeholder="닉네임"
+                   style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <input type="password" id="password" name="password" pattern="^\S*$" placeholder="비밀번호"
                    style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
         </div>
 
         <!-- 제목 입력 -->
         <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-            <input type="text" id="title" name="title" placeholder="제목을 입력하세요"
+            <input type="text" id="title" name="title" placeholder="제목"
                    style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
             <button type="button" onclick="addImage()"
                     style="padding: 10px 15px;
@@ -31,6 +39,7 @@
         <!-- 글쓰기 영역 -->
         <div id="editor" contenteditable="true" aria-placeholder="글을 작성하거나 이미지를 삽입하세요."
              style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; min-height: 300px; max-height: 400px; overflow-y: auto; margin-bottom: 20px; background-color: #ffffff;">
+
         </div>
 
         <!-- 숨겨진 파일 입력 -->
@@ -50,7 +59,7 @@
     </div>
 </div>
 <script>
-    const uploadedFiles = []; // 업로드한 이미지 파일 목록
+    //const uploadedFiles = []; // 업로드한 이미지 파일 목록
 
     function addImage() {
         document.getElementById('imageInput').click();
@@ -60,15 +69,11 @@
         const file = event.target.files[0];
         if (file) {
             const fileId = Date.now(); // 고유 ID 생성
-
-            // 업로드 목록에 파일 추가
-            uploadedFiles.push({ id: fileId, file: file });
-
             const reader = new FileReader();
             reader.onload = function (e) {
                 const img = document.createElement('img');
                 img.src = e.target.result;
-                img.style.width = "300px";
+                img.style.max_width = "1000px"
                 img.style.height = "auto";
                 img.setAttribute("data-file-id", fileId); // 고유 ID 저장
                 img.setAttribute("data-file-name", file.name); // 파일 이름 저장
@@ -97,29 +102,16 @@
         selection.addRange(range);
     }
 
-    // 에디터에서 백스페이스로 이미지 삭제 시 동기화
-    document.getElementById("editor").addEventListener("input", () => {
-        const editor = document.getElementById("editor");
-        const currentImages = Array.from(editor.querySelectorAll("img"));
-
-        // `uploadedFiles`에서 현재 DOM에 없는 이미지 제거
-        uploadedFiles.forEach((item, index) => {
-            const isStillInEditor = currentImages.some(img => img.getAttribute("data-file-id") === String(item.id));
-            if (!isStillInEditor) {
-                uploadedFiles.splice(index, 1); // 배열에서 제거
-            }
-        });
-    });
-
     function cancelForm() {
         if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
-            window.location.href = "/test/{{category}}";
+            window.location.href = "/article/test/{{category}}";
         }
     }
 
     function prepareForm() {
         const title = document.getElementById("title").value.trim();
         const writer = document.getElementById("writer").value.trim();
+        const password = document.getElementById("password").value.trim();
         const contentElement = document.getElementById("editor");
         const content = contentElement.innerHTML.trim();
 
@@ -128,15 +120,20 @@
             return;
         }
 
+        if (password.length < 2 || password.length > 255){
+            alert("비밀번호를 2자 이상 입력해주세요.");
+            return;
+        }
+        else if (password.length > 255){
+            alert("비밀번호가 너무 깁니다. 비밀번호를 수정해주세요.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("title", title);
         formData.append("writer", writer);
         formData.append("content", content);
-
-        // 업로드된 파일 추가
-        uploadedFiles.forEach(item => {
-            formData.append("images", item.file);
-        });
+        formData.append("password", password);
 
         fetch('/submit/{{category}}', {
             method: 'POST',

@@ -1,0 +1,168 @@
+{{>layouts/header}}
+{{>layouts/categories}}
+<style>
+    #editor img {
+        max-width: 100%; /* 에디터 너비를 넘지 않음 */
+        height: auto;    /* 비율 유지 */
+    }
+</style>
+<input type="hidden"  id="id" value="{{article.id}}">
+<input type="hidden"  id="created" value="{{article.created}}">
+
+<div class="main-container">
+    <!-- 카테고리 제목 -->
+    <div class="gallery-header">
+        <h2>{{article.category}}</h2>
+    </div>
+    <div style="max-width: 1000px; margin: 20px auto; font-family: Arial, sans-serif;">
+        <!-- 닉네임 입력 -->
+        <div style="margin-bottom: 20px;">
+            <input type="text" value={{article.writer}} id="writer" name="writer" placeholder="닉네임"
+                   style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <input type="password" value={{article.password}} id="password" name="password" pattern="^\S*$" placeholder="비밀번호"
+                   style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+
+        <!-- 제목 입력 -->
+        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <input type="text" id="title" value={{article.title}} name="title" placeholder="제목"
+                   style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <button type="button" onclick="addImage()"
+                    style="padding: 10px 15px;
+                           background-color: #007BFF;
+                           color: white;
+                           border: none;
+                           border-radius: 5px;
+                           cursor: pointer;
+                           font-size: 14px;">
+                이미지 추가
+            </button>
+        </div>
+
+        <!-- 글쓰기 영역 -->
+        <div id="editor" data-content="{{article.content}}" contenteditable="true" aria-placeholder="글을 작성하거나 이미지를 삽입하세요."
+             style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; min-height: 300px; max-height: 400px; overflow-y: auto; margin-bottom: 20px; background-color: #ffffff;">
+
+        </div>
+
+        <!-- 숨겨진 파일 입력 -->
+        <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="insertImage(event)">
+
+        <!-- 폼 버튼 -->
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="cancelForm()"
+                    style="padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; cursor: pointer;">
+                취소
+            </button>
+            <button type="button" class="submit-btn" onclick="prepareForm()"
+                    style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;">
+                등록
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById("editor").innerHTML = document.getElementById("editor").getAttribute("data-content");
+
+   //const uploadedFiles = []; // 업로드한 이미지 파일 목록
+
+   function addImage() {
+       document.getElementById('imageInput').click();
+   }
+
+   function insertImage(event) {
+       const file = event.target.files[0];
+       if (file) {
+           const fileId = Date.now(); // 고유 ID 생성
+           const reader = new FileReader();
+           reader.onload = function (e) {
+               const img = document.createElement('img');
+               img.src = e.target.result;
+               img.style.max_width = "1000px"
+               img.style.height = "auto";
+               img.setAttribute("data-file-id", fileId); // 고유 ID 저장
+               img.setAttribute("data-file-name", file.name); // 파일 이름 저장
+
+               const editor = document.getElementById("editor");
+               if (!editor) {
+                   console.error("Editor element not found!");
+                   return;
+               }
+               editor.appendChild(img);
+
+               moveCursorToEnd(img);
+               document.getElementById('imageInput').value = ''; // 초기화
+           };
+
+           reader.readAsDataURL(file);
+       }
+   }
+
+   function moveCursorToEnd(element) {
+       const range = document.createRange();
+       const selection = window.getSelection();
+       range.setStartAfter(element);
+       range.collapse(true);
+       selection.removeAllRanges();
+       selection.addRange(range);
+   }
+
+   function cancelForm() {
+       if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
+           window.location.href = "/";
+       }
+   }
+
+   function prepareForm() {
+       const id = document.getElementById("id").value.trim();
+       const created = document.getElementById("created").value.trim();
+       const title = document.getElementById("title").value.trim();
+       const writer = document.getElementById("writer").value.trim();
+       const password = document.getElementById("password").value.trim();
+       const contentElement = document.getElementById("editor");
+       const content = contentElement.innerHTML.trim();
+
+       if (!title || !writer || !content) {
+           alert("닉네임, 제목, 내용을 모두 입력해주세요.");
+           return;
+       }
+
+       if (password.length < 2 || password.length > 255){
+           alert("비밀번호를 2자 이상 입력해주세요.");
+           return;
+       }
+       else if (password.length > 255){
+           alert("비밀번호가 너무 깁니다. 비밀번호를 수정해주세요.");
+           return;
+       }
+
+       const formData = new FormData();
+       formData.append("id", id);
+       formData.append("created", created);
+       formData.append("title", title);
+       formData.append("writer", writer);
+       formData.append("content", content);
+       formData.append("password", password);
+
+       fetch('/submit/{{article.category}}', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                window.location.href = data.redirectUrl;
+            })
+            .catch(error => {
+                console.error("Error:", error.message);
+                alert("등록에 실패했습니다.");
+            });
+    }
+</script>
+</body>
+</html>

@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Slf4j
@@ -27,22 +30,29 @@ public class S3FileService {
         this.bucket = bucket;
     }
 
-    public String upload(MultipartFile file, String dirName) throws IOException {
-        String uniqueFileName = makeUniqueFileName(file);
+    public String upload(File file, String dirName) throws IOException {
+        String uniqueFileName = makeUniqueFileName(file.getName());
         String fileName = dirName + "/" + uniqueFileName;
-        File uploadFile = convert(file, uniqueFileName);
-        String uploadImageUrl = putS3(uploadFile, fileName);
-        freeGarbageFile(uploadFile);
-
+        String uploadImageUrl = putS3(file, fileName);
+//        freeGarbageFile(file);
         log.info(uploadImageUrl+"에 파일 업로드 완료");
         return uploadImageUrl;
     }
 
-    private String makeUniqueFileName(MultipartFile file){
-        String originalFileName = file.getOriginalFilename();
-        log.info("ori name is " + originalFileName);
+    public String upload(MultipartFile file, String dirName) throws IOException {
+        String uniqueFileName = makeUniqueFileName(file.getOriginalFilename());
+        String fileName = dirName + "/" + uniqueFileName;
+        File uploadFile = convert(file, uniqueFileName);
+        String uploadImageUrl = putS3(uploadFile, fileName);
+        freeGarbageFile(uploadFile);
+        log.info(uploadImageUrl+"에 파일 업로드 완료");
+        return uploadImageUrl;
+    }
+
+    private String makeUniqueFileName(String fileName){
+        log.info("ori name is " + fileName);
         String uuid = UUID.randomUUID().toString();
-        return uuid + "_" + originalFileName.replaceAll("\\s", "_");
+        return uuid + "_" + fileName.replaceAll("\\s", "_");
     }
 
     private File convert(MultipartFile file, String uniqueFileName) throws IOException {
@@ -62,15 +72,21 @@ public class S3FileService {
     }
 
     private String putS3(File uploadFile, String fileName) {
+        log.info("file name is " + fileName);
+        log.info("file name is " + uploadFile.getName());
+
         amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile)
                 .withCannedAcl(CannedAccessControlList.PublicRead));
-        log.info("file name is " + fileName);
+
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
     private void freeGarbageFile(File targetFile) {
-        if (!targetFile.delete()){
-            log.info("파일 삭제 실패");
+        try {
+            targetFile.delete();
+        }
+        catch (Exception e) {
+            log.info(e.getMessage());
         }
     }
 

@@ -12,11 +12,11 @@
         </div>
         <a href="/post/{{category}}" class="write-button">글쓰기</a>
     </div>
-    <table>
+    <table style="table-layout: fixed; width: 100%; border-collapse: collapse;">
         <thead>
         <tr>
             <th>번호</th>
-            <th>제목</th>
+            <th style="width: 550px;">제목</th>
             <th>글쓴이</th>
             <th>작성일</th>
             <th>조회</th>
@@ -27,11 +27,13 @@
         <tbody>
         <tr>
             <td>{{id}}</td>
-            <td><a href="/article/show/{{id}}">{{title}}</a></td>
-            <td>{{writer}}</td>
-            <td>24.12.30</td>
-            <td>395</td>
-            <td>0</td>
+            <td style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"><a href="/article/show/{{id}}">{{title}}</a></td>
+            <td  style="word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        white-space: normal;">{{writer}}({{ip}})</td>
+            <td>{{created}}</td>
+            <td>{{views}}</td>
+            <td>{{recommend}}</td>
         </tr>
         </tbody>
         {{/articleList}}

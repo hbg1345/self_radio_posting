@@ -5,20 +5,25 @@ import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static javax.imageio.ImageIO.read;
 
 @Slf4j
 public class SubtitleAdder {
     private static final int targetHeight = 600;
     private static final int targetWidth = 600;
-    private static final Font font = new Font("굴림", Font.BOLD, 20);
+    private static final Font font = new Font("맑은 고딕", Font.BOLD, 30);
     private static final Color fontColor = Color.WHITE;
 
     static ArrayList<String> splitString(String inputString){
@@ -54,18 +59,23 @@ public class SubtitleAdder {
         return ret;
     }
 
-    public static ArrayList<ArrayList<String>> convertTextsList(ArrayList<ArrayList<String>> textsList){
+    public static ArrayList<ArrayList<String>> convertTextsList(LinkedList<LinkedList<String>> textsList){
         ArrayList<ArrayList<String>> ret = new ArrayList<>();
-        for(ArrayList<String> texts: textsList){
+        for(LinkedList<String> texts: textsList){
             ret.add(splitTexts(texts));
         }
         return ret;
     }
 
     public static BufferedImage addSubtitleToImage(
-            MultipartFile multipartFile, String subtitle) throws IOException{
-        InputStream inputStream = multipartFile.getInputStream();
-        BufferedImage image = ImageIO.read(inputStream);
+            BufferedImage file, String subtitle) throws IOException{
+        BufferedImage image =  new BufferedImage(
+                targetWidth, targetHeight, 1);
+
+        if (file != null) {
+            image = file;
+        }
+
         BufferedImage resizedImage = new BufferedImage(
                 targetWidth, targetHeight, image.getType());
         int height = image.getHeight();
@@ -95,16 +105,16 @@ public class SubtitleAdder {
         image = resizedImage;
         // 2. Graphics2D로 텍스트 추가
         Graphics2D g2d = image.createGraphics();
-
-        g2d.setFont(font);
-        g2d.setColor(fontColor);
-        g2d.getFontMetrics().stringWidth(subtitle);
-        // 텍스트 위치 설정 (하단 중앙)
-        int textWidth = g2d.getFontMetrics().stringWidth(subtitle);
-        int x = (image.getWidth() - textWidth) / 2;
-        int y = image.getHeight() - 25; // 하단에서 50px 위
-        g2d.drawString(subtitle, x, y);
-
+        if (subtitle != null) {
+            g2d.setFont(font);
+            g2d.setColor(fontColor);
+            g2d.getFontMetrics().stringWidth(subtitle);
+            // 텍스트 위치 설정 (하단 중앙)
+            int textWidth = g2d.getFontMetrics().stringWidth(subtitle);
+            int x = (image.getWidth() - textWidth) / 2;
+            int y = image.getHeight() - 50; // 하단에서 50px 위
+            g2d.drawString(subtitle, x, y);
+        }
         g2d.dispose(); // Graphics2D 리소스 해제
         // 3. 수정된 BufferedImage 반환
         return image;
@@ -123,9 +133,18 @@ public class SubtitleAdder {
         for (BufferedImage image : images) {
             encoder.encodeImage(image);
         }
-
         // 4. 인코딩 완료
         encoder.finish();
         log.info("동영상이 생성되었습니다: " + outputFilePath);
+    }
+    public static void main(String [] args) throws IOException {
+        BufferedImage temp = read(new File("image0.png"));
+        if (temp == null){
+            log.info("?000");
+        }
+        BufferedImage temp2 = read(new File("image1.png"));
+        if (temp2 == null){
+            log.info("?111");
+        }
     }
 }

@@ -3,21 +3,22 @@ package com.example.selfRadioPosting.service;
 import com.example.selfRadioPosting.Entity.Article;
 import com.example.selfRadioPosting.dto.ArticleDto;
 import com.example.selfRadioPosting.repository.ArticleRepository;
-import com.example.selfRadioPosting.util.Pair;
+import com.example.selfRadioPosting.util.FileManager;
 import com.example.selfRadioPosting.util.SubtitleAdder;
-import com.google.cloud.texttospeech.v1.AudioConfigOrBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,25 +30,19 @@ import java.util.regex.Pattern;
 public class ArticleService {
     private ArticleRepository articleRepository;
     private AudioService audioService;
+    private S3FileService s3FileService;
 
     @Autowired
-    ArticleService(ArticleRepository articleRepository, AudioService audioService){
+    ArticleService(ArticleRepository articleRepository,
+                   AudioService audioService,
+                   S3FileService s3FileService){
         this.audioService = audioService;
         this.articleRepository = articleRepository;
+        this.s3FileService = s3FileService;
     }
 
-    private ArrayList<String> extractBase64Images(String content) {
-        ArrayList<String> base64Images = new ArrayList<>();
-        Pattern pattern = Pattern.compile("data:image/[^;]+;base64,[^\"]+");
-        Matcher matcher = pattern.matcher(content);
-        while (matcher.find()) {
-            base64Images.add(matcher.group());
-        }
-        return base64Images;
-    }
-
-    private static void extractTextNodes2(Node node, ArrayList<String> texts,
-                                         ArrayList<ArrayList<String>> textsList) {
+    private static void extractTexts(Node node, LinkedList<String> texts,
+                                         LinkedList<LinkedList<String>> textsList) {
         if (node instanceof TextNode) {
             String text = ((TextNode) node).text().trim();
             if (!text.isEmpty()) {
@@ -56,82 +51,122 @@ public class ArticleService {
         }
 
         if (node.nodeName().equals("img")){
-            textsList.add((ArrayList<String>) texts.clone());
+            if (texts.isEmpty())
+                texts.add(".");
+            textsList.add((LinkedList<String>) texts.clone());
             texts.clear();
         }
         for (Node child : node.childNodes()) {
-            extractTextNodes2(child, texts, textsList);
+            extractTexts(child, texts, textsList);
         }
     }
 
-    private static void extractTextNodes(Node node, List<String> textNodes) {
-        if (node instanceof TextNode) {
-            String text = ((TextNode) node).text().trim();
-            if (!text.isEmpty()) {
-                textNodes.add(text);
-            }
+    @Transactional
+    public void delete(Long id){
+        Article article = articleRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        log.info(article.getAudioUrl());
+        s3FileService.deleteFile(article.getVideoUrl());
+        s3FileService.deleteFile(article.getAudioUrl());
+
+        Document document = Jsoup.parse(article.getContent());
+        Elements elements = document.getElementsByTag("img");
+        for(Element element: elements){
+            s3FileService.deleteFile(element.absUrl("src"));
         }
-//        log.info(node.nodeName());
-        for (Node child : node.childNodes()) {
-            extractTextNodes(child, textNodes);
-        }
+        articleRepository.deleteById(id);
     }
 
+    @Transactional
     public void submit(
             ArticleDto articleDto,
             List<String> urls,
-            List<MultipartFile> images) throws IOException {
-        ArrayList<String> base64Images = extractBase64Images(articleDto.getContent());
+            ArrayList<BufferedImage> images) throws IOException {
+
+        String audioOutPath = "output_audio.wav";
+        String videoOutPath = "output_video.mp4";
         String updatedContent = articleDto.getContent();
         Document document = Jsoup.parse(articleDto.getContent());
+        Elements elements = document.getElementsByTag("img");
 
-        if (urls.size() != base64Images.size()){
-            throw new IllegalArgumentException("image가 백스페이스로 지워지지 않았습니다. (Java script 에러)");
+        if (urls.size() != elements.size()){
+            throw new IllegalArgumentException("이미지 개수를 잘못 카운트하였습니다.");
         }
 
         for(int i=0; i<urls.size(); i++){
-            updatedContent = updatedContent.replace(base64Images.get(i), urls.get(i));
+            updatedContent = updatedContent.replace(elements.get(i).absUrl("src"), urls.get(i));
         }
 
-        // 텍스트 노드를 담을 리스트 생성
-        ArrayList<String> texts = new ArrayList<>();
-        ArrayList<ArrayList<String>> textsList = new ArrayList<>();
-//        log.info(String.valueOf(document.body().childNodeSize()));
-
-        extractTextNodes2(document.body(), texts, textsList);
+        LinkedList<String> texts = new LinkedList<>();
+        LinkedList<LinkedList<String>> textsList = new LinkedList<>();
+        extractTexts(document.body(), texts, textsList);
         if (!texts.isEmpty()) {
-            textsList.add((ArrayList<String>) texts.clone());
+            textsList.add((LinkedList<String>) texts.clone());
             texts.clear();
         }
-        log.info("텍스트 리스트의 리스트: " + textsList.toString());
-        ArrayList<ArrayList<String>> converted = SubtitleAdder.convertTextsList(textsList);
-        log.info("바뀐 텍스트 리스트의 리스트: " + converted.toString());
-        // body의 모든 자식 노드 순회
 
+        ArrayList<ArrayList<String>> converted = SubtitleAdder.convertTextsList(textsList);
         ArrayList<String> flattened = new ArrayList<>();
         converted.forEach(strings-> Collections.addAll(flattened, strings.toArray(new String[0])));
-        log.info("납작해진 텍스트 리스트의 리스트: " + flattened.toString());
+        ArrayList<Float> durations = audioService.stringToSpeech(flattened, audioOutPath);
 
-        extractTextNodes(document.body(), flattened);
-        ArrayList<Float> durations = audioService.stringToSpeech(flattened);
-        log.info(articleDto.getContent());
-        log.info("텍스트 리스트:" + texts.toString());
-        log.info(durations.toString());
+        LinkedList<BufferedImage> bufferedImages = new LinkedList<>();
+        int fps = 4;
+        int imgIndex = -1;
+        int txtCount = converted.get(0).size();
 
-        Article article = new Article(
-                null,
-                articleDto.getCategory(),
-                articleDto.getWriter(),
-                articleDto.getTitle(),
-                updatedContent);
+        for(int i=0; i<flattened.size(); i++){
+            if (txtCount == i){
+                imgIndex++;
+                txtCount += converted.get(imgIndex+1).size();
+            }
+            float duration = durations.get(i);
+            int numOfFrame = (int) Math.ceil(fps * duration);
+            BufferedImage subtitleAdded;
+            if (imgIndex == - 1)
+                subtitleAdded = SubtitleAdder.addSubtitleToImage(null, flattened.get(i));
+            else subtitleAdded = SubtitleAdder.addSubtitleToImage(images.get(imgIndex), flattened.get(i));
+
+            for (int j = 0; j < numOfFrame; j++) {
+                bufferedImages.add(subtitleAdded);
+            }
+        }
+
+        for (int i = imgIndex+1; i < images.size(); i++) {
+            BufferedImage subtitleAdded =
+                    SubtitleAdder.addSubtitleToImage(images.get(i), null);
+            for (int j = 0; j < fps; j++) {
+                bufferedImages.add(subtitleAdded);
+            }
+        }
+
+        SubtitleAdder.createVideoFromImages(bufferedImages,
+                videoOutPath, 4);
+        File video = new File(videoOutPath);
+        File audio = new File(audioOutPath);
+
+        String videoUrl = s3FileService.upload(video, "dir");
+        String audioUrl = s3FileService.upload(audio, "dir");
+
+        Article article = articleDto.createEntity();
+        article.setId(null);
+        article.setContent(updatedContent);
+        article.setVideoUrl(videoUrl);
+        article.setAudioUrl(audioUrl);
+
+        if (articleDto.getId() != null) {
+            delete(articleDto.getId());
+        }
 
         Article created = articleRepository.save(article);
         log.info(created.toString());
-        ArrayList<BufferedImage> bufferedImages = new ArrayList<>();
-        for(int i=0; i<texts.size(); i++){
-            bufferedImages.add(SubtitleAdder.addSubtitleToImage(images.get(i), texts.get(i)));
+        //Delete temporary created files.
+
+        for (int i = 0; i < flattened.size(); i++) {
+            FileManager.deleteFile("output" + i + ".wav");
         }
-        SubtitleAdder.createVideoFromImages(bufferedImages, "outputvideo.mp4", 1);
+
+        FileManager.deleteFile(audioOutPath);
+        FileManager.deleteFile(videoOutPath);
     }
 
     public List<ArticleDto> findAllByCategory(String category) {
@@ -139,9 +174,16 @@ public class ArticleService {
         return articleList.stream().map(ArticleDto::createDto).toList();
     }
 
+    @Transactional
     public ArticleDto show(Long id) {
+        articleRepository.updateView(id);
         Article article =  articleRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("이상발생"));
         return ArticleDto.createDto(article);
+    }
+
+    @Transactional
+    public void recommend(Long id) {
+        articleRepository.recommend(id);
     }
 }

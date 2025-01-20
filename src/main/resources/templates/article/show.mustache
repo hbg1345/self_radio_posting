@@ -1,29 +1,175 @@
 {{>layouts/header}}
 {{>layouts/categories}}
-<div class="main-container" style="height: 100vh; overflow-y: auto;">
+<style>
+    .article-content img {
+        max-width: 100%; /* 컨테이너 너비에 맞춤 */
+        height: auto;    /* 비율 유지 */
+    }
+    .edit-button {
+    position: absolute; /* 부모 컨테이너의 위치를 기준으로 배치 */
+    top: 10; /* 위쪽 경계에 고정 */
+    right: 10; /* 오른쪽 경계에 고정 */
+    padding: 8px 16px; /* 버튼 내부 여백 */
+    border: none; /* 테두리 제거 */
+    border-radius: 5px; /* 둥근 모서리 */
+    background-color: #007BFF; /* 파란색 배경 */
+    color: white; /* 흰색 텍스트 */
+    cursor: pointer; /* 마우스 포인터 표시 */
+    font-size: 14px; /* 글자 크기 */
+    }
+
+}
+
+</style>
+<div class="main-container" style="height: 100vh; overflow-y: visible;">
     <!-- 카테고리 제목 -->
     <div class="gallery-header">
         <h2>{{article.category}}</h2>
     </div>
 
     <!-- 글 내용 표시 -->
-    <div class="article-container">
-        <div class="article-header">
-            <h2 class="article-title"> {{article.title}}</h2> <!-- 글 태그 및 제목 -->
-            <p class="article-meta">
-                작성자: {{article.writer}} | 작성일:23.12.23
-            </p>
+    <div class="article-container" style="position: relative;">
+        <div class="article-header" style="position: relative;">
+            <h2 class="article-title" style="display: inline-block; margin: 0;">{{article.title}}</h2>
+            <!-- 모달 구조 -->
+            <div
+                    id="modal"
+                    style="display: none; z-index: 999; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+                <div
+                        style="background: white; padding: 20px; border-radius: 10px; text-align: center; width: 300px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);">
+                    <label for="modalInput"></label><input
+                            id="modalInput"
+                            type="text"
+                            placeholder="비밀번호"
+                            style="width: calc(100% - 20px); padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px;">
+                    <br>
+                    <button
+                            id="submitModal"
+                            style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        제출
+                    </button>
+                    <button
+                            id="closeModal"
+                            style="margin-top: 10px; padding: 10px 20px; font-size: 16px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        닫기
+                    </button>
+                </div>
+            </div>
+            <button id="editButton" class="edit-button"
+                    style="position: absolute; right: 20px; top: 0; padding: 5px 12px; font-size: 14px; cursor: pointer;">수정</button>
+            <button id="deleteButton" class="delete-button"
+                    style="position: absolute; right: 80px; top: 0; padding: 5px 12px; font-size: 14px; cursor: pointer;">삭제</button>
         </div>
+        <p class="article-meta" style="margin: 10px 0;">
+            작성자: {{article.writer}}({{article.ip}}) | 작성일:{{article.created}} | 조회수: {{article.views}} | 추천수: {{article.recommend}}
+        </p>
 
-        <div class="article-content">
-            {{{article.content}}} <!-- HTML 내용 렌더링 -->
+        <div class="article-content" >
+            {{{article.content}}}<!-- HTML 내용 렌더링 -->
+            <br>
+            <video id="myVideo" width="600" controls>
+                <source src={{article.videoUrl}} type="video/mp4">
+                동영상 파일을 지원하지 않는 브라우저입니다.
+            </video>
+            <!-- 오디오 (WAV 파일) -->
+            <audio id="myAudio">
+                <source src={{article.audioUrl}} type="audio/wav">
+                오디오 파일을 지원하지 않는 브라우저입니다.
+            </audio>
         </div>
+        <button id="recommendButton" class="recommend-button"
+                style="position:relative; left:50%; width:60px;
+                    height:60px;
+                    background-color: #4CAF50;
+                    color: white;
+                    font-size: 16px;
+                    border: none;
+                    border-radius: 50%;"
+                onmouseover="this.style.backgroundColor='#45a049';"
+                onmouseout="this.style.backgroundColor='#4CAF50';"
+                onclick="location.href='/article/recommend/{{article.id}}'"
+            >추천</button>
     </div>
+    <footer>
+        <p>© 2025 Your Website. All rights reserved.</p>
+    </footer>
 </div>
 
-<footer>
-    <p>© 2025 Your Website. All rights reserved.</p>
-</footer>
+<script>
+    var video = document.getElementById('myVideo');
+    var audio = document.getElementById('myAudio');
 
+    // 동영상-오디오 시간 동기화
+    video.addEventListener('seeked', function() {
+            audio.currentTime = video.currentTime;
+        });
+
+    // 동영상-오디오 재생 속도 동기화
+    video.addEventListener('ratechange', function() {
+            audio.playbackRate = video.playbackRate;
+        });
+
+    // 동영상 재생 시 오디오도 재생
+    video.addEventListener('play', function() {
+        audio.play();
+    });
+
+    // 동영상 일시정지 시 오디오도 일시정지
+    video.addEventListener('pause', function() {
+        audio.pause();
+    });
+
+    // 동영상 종료 시 오디오도 종료
+    video.addEventListener('ended', function() {
+        audio.pause();
+        audio.currentTime = 0; // 오디오 재생 위치 초기화
+    });
+
+    var deleteButton = document.getElementById('deleteButton');
+    var editButton = document.getElementById('editButton');
+    var modal = document.getElementById('modal');
+    var closeModal = document.getElementById('closeModal');
+    var submitButton = document.getElementById('submitModal');
+    var inputField = document.getElementById('modalInput');
+    var deleteOrEdit;
+
+    editButton.addEventListener('click', function() {
+        modal.style.display = 'flex';
+        deleteOrEdit = 1;
+    });
+
+    deleteButton.addEventListener('click', function() {
+        modal.style.display = 'flex';
+        deleteOrEdit = 0;
+    });
+
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+        inputField.value="";
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            inputField.value="";
+        }
+    });
+
+
+    submitButton.addEventListener('click', function() {
+        var inputValue = inputField.value.trim();
+        if (inputValue == {{article.password}}) {
+            if(deleteOrEdit == 1)
+                window.location.href = "/article/edit/{{article.id}}";
+            else
+                window.location.href = "/article/delete/{{article.id}}";
+        } else {
+            inputField.value="";
+            alert("잘못된 비밀번호입니다.");
+        }
+    });
+
+
+</script>
 </body>
 </html>
