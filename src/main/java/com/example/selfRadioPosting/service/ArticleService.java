@@ -62,6 +62,21 @@ public class ArticleService {
     }
 
     @Transactional
+    public void update(Article target){
+        Article article = articleRepository.findById(target.getId()).orElseThrow(IllegalArgumentException::new);
+        log.info(article.getAudioUrl());
+        s3FileService.deleteFile(article.getVideoUrl());
+        s3FileService.deleteFile(article.getAudioUrl());
+
+        Document document = Jsoup.parse(article.getContent());
+        Elements elements = document.getElementsByTag("img");
+        for(Element element: elements){
+            s3FileService.deleteFile(element.absUrl("src"));
+        }
+        articleRepository.update(target.getId(), target.getContent(), target.getAudioUrl(), target.getVideoUrl());
+    }
+
+    @Transactional
     public void delete(Long id){
         Article article = articleRepository.findById(id).orElseThrow(IllegalArgumentException::new);
         log.info(article.getAudioUrl());
@@ -148,17 +163,17 @@ public class ArticleService {
         String audioUrl = s3FileService.upload(audio, "dir");
 
         Article article = articleDto.createEntity();
-        article.setId(null);
         article.setContent(updatedContent);
         article.setVideoUrl(videoUrl);
         article.setAudioUrl(audioUrl);
 
+        Article saved;
         if (articleDto.getId() != null) {
-            delete(articleDto.getId());
+            update(article);
+            saved = article;
         }
-
-        Article created = articleRepository.save(article);
-        log.info(created.toString());
+        else saved = articleRepository.save(article);
+        log.info(saved.toString());
         //Delete temporary created files.
 
         for (int i = 0; i < flattened.size(); i++) {

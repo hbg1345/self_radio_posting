@@ -1,0 +1,63 @@
+<div>
+    <!-- 댓글 목록 -->
+    {{>comments/_list}}
+    <!-- 새 댓글 작성 -->
+    {{>comments/_new_comment}}
+</div>
+
+<!--답글 작성란 보이게 하기-->
+<script>
+    {
+        var prevSelected = null;
+        const commentBtns = document.querySelectorAll(".btn_reply_write_all");
+        commentBtns.forEach(btn=>{
+            btn.addEventListener("click", function() {
+                 const commentId = btn.getAttribute("data-comment-id");
+                 var writeBox = document.querySelector(`#reply_for_${commentId}`);
+                 writeBox.style.display = "block";
+                 if (prevSelected != null && prevSelected.style.display == "block")
+                    prevSelected.style.display = "none";
+                 if (writeBox.style.display == "block")
+                    prevSelected = writeBox;
+                 else prevSelected = null;
+            });
+        });
+    }
+</script>
+
+<!--답글 추가-->
+<script>
+    {
+        const replyCreateBtns = document.querySelectorAll(".reply_add");
+        replyCreateBtns.forEach(btn=>
+        {
+            btn.addEventListener("click", function() {
+            const commentId = btn.getAttribute("data-comment-id");
+            const writeBox = document.querySelector(`#reply_for_${commentId}`);
+
+            const reply = {
+                writer: writeBox.querySelector('input[name="reply-name"]').value,
+                content: writeBox.querySelector('textarea[name="reply-body"]').value,
+                commentId: commentId,
+                password: writeBox.querySelector('input[name="reply-password"]').value
+            };
+
+            const url = "/api/comments/" + commentId + "/replies";
+            fetch(url,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                        },
+                    body: JSON.stringify(reply)
+                }).then(response=> {
+                    const msg = (response.ok) ? "답글이 등록되었습니다." : "답글 등록 과정에서 문제가 발생하였습니다.";
+                    alert(msg);
+                    window.location.reload();});
+                });
+        });
+    }
+</script>
+
+
+

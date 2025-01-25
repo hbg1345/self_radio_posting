@@ -1,0 +1,1 @@
+insert into article(title, content, writer, password, category) values ('테스트제목', '테스트 내용', '테스트작성자','12','게임');

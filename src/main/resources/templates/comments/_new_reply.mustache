@@ -1,0 +1,28 @@
+<div class="cmt_write_box small clear blind" id="reply_for_{{id}}" data-comment-id="{{id}}">
+    <div class="f1">
+        <div class="user_info_input">
+            <label for="user_nick" class="blind">닉네임</label>
+            <input type="text" name="reply-name" placeholder="닉네임"
+                   onfocus="this.style.background='#FFFFFF'" maxlength="20" style="background: rgb(255, 255, 255);">
+        </div>
+        <div class="user_info_input">
+            <label for="user_pw" class="blind">비밀번호</label>
+            <input type="password" id="reply-password-{{id}}" name="reply-password" placeholder="비밀번호"
+                   onfocus="this.style.background='#FFFFFF'" maxlength="20" style="background: rgb(255, 255, 255);">
+        </div>
+    </div>
+    <div class="cmt_txt_cont">
+        <div class="cmt_write">
+            <label for="cmt_textarea" class="cmt_textarea_label"
+                   onclick="$('.cmt_textarea_label').hide();$(this).siblings('textarea').focus();"
+                   style="display: none;">
+            </label>
+            <textarea class="new-reply-body" name="reply-body" id="new-reply-body-{{id}}" maxlength="400"></textarea>
+        </div>
+        <div class="cmt_cont_bottom clear">
+            <div class="fr">
+                <button type="button" data-comment-id={{id}} id="reply_btn_for_{{id}}" class="btn_blue btn_svc small reply_add">등록</button>
+            </div>
+        </div>
+    </div>
+</div>

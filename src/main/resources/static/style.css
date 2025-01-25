@@ -1,0 +1,407 @@
+ /* 기존 스타일 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    font-size: 16px;
+}
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+header h1 {
+    margin: 0;
+}
+.search-bar {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.search-bar input[type="text"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.search-bar button {
+    padding: 5px 10px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+nav {
+    background-color: #333;
+    padding: 10px;
+    display: flex; /* flexbox 사용 */
+    justify-content: center; /* 가로 중앙 정렬 */
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px; /* 좌우 간격 */
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+.main-container {
+    margin: 0 auto;
+    max-width:1000px;
+    padding: 20px;
+}
+.gallery-header {
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.gallery-header h2 {
+    margin: 0;
+}
+.tab-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+}
+.tab-buttons button {
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+.tab-buttons button.active {
+    background-color: #4CAF50;
+    color: white;
+}
+.write-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.write-button:hover {
+    background-color: #45a049;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+table th, table td {
+    padding: 10px;
+    text-align: center;
+}
+table th {
+    background-color: #f0f0f0;
+}
+table td a {
+    text-decoration: none;
+    color: inherit;
+}
+table td a:hover {
+    text-decoration: none;
+    color: inherit;
+}
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+}
+.white-link {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* article 스타일 */
+.article-container {
+    width: 95%;
+    max-width: 1000px;
+    margin: 0 auto; /* 좌우 중앙 정렬 */
+    padding: 20px; /* 내부 여백 */
+    background-color: #fff; /* 배경색 */
+
+    border: none;
+    border-bottom: solid;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+
+}
+
+.article-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: start;
+}
+
+.article-meta {
+    font-size: 14px;
+    color: #666;
+    text-align: start;
+    margin-bottom: 20px;
+}
+
+.article-content {
+    font-size: 16px;
+    line-height: 1.6;
+
+}
+
+.article-footer {
+    font-size: 14px;
+    color: #666;
+    margin-top: 20px;
+    text-align: center; /* 하단 정보 중앙 정렬 */
+}
+
+
+/* 댓글창 */
+/* 전체 박스 */
+.cmt_write_box {
+    max-width: 1000px;
+    border: 1px solid #d3d3d3; /* 외곽 테두리 */
+    padding: 16px; /* 내부 여백 */
+    background-color: #ffffff; /* 배경 흰색 */
+    width: 100%; /* 가로 폭 전체 */
+    box-sizing: border-box; /* 패딩 포함 박스 크기 */
+    border-radius: 4px; /* 모서리를 둥글게 */
+    margin-top: 40px;
+}
+
+/* 입력 필드 공통 스타일 */
+
+.user_info_input{
+    display:inline-block;
+    margin:0px;
+}
+
+.user_info_input input {
+    width: 100%; /* 입력 필드 가로폭 */
+    padding: 8px; /* 텍스트와 박스 테두리 간 여백 */
+    margin-bottom: 8px; /* 아래 요소와 간격 */
+    border: 1px solid #ccc; /* 입력 필드 테두리 */
+    border-radius: 4px; /* 모서리를 둥글게 */
+    font-size: 14px; /* 텍스트 크기 */
+    box-sizing: border-box; /* 패딩 포함 크기 */
+}
+
+/* 댓글 입력 필드 */
+#new-comment-body {
+    width: 90%; /* 가로 폭 전체 */
+    height: 80px; /* 높이 고정 */
+    padding: 8px; /* 내부 여백 */
+    border: 1px solid #ccc; /* 테두리 */
+    border-radius: 4px; /* 모서리 둥글게 */
+    resize: none; /* 크기 조정 금지 */
+    font-size: 14px; /* 텍스트 크기 */
+}
+
+.new-reply-body {
+    width: 90%; /* 가로 폭 전체 */
+    height: 80px; /* 높이 고정 */
+    padding: 8px; /* 내부 여백 */
+    border: 1px solid #ccc; /* 테두리 */
+    border-radius: 4px; /* 모서리 둥글게 */
+    resize: none; /* 크기 조정 금지 */
+    font-size: 14px; /* 텍스트 크기 */
+}
+
+/* 하단 버튼 컨테이너 */
+.cmt_cont_bottom {
+    display: flex; /* 버튼 정렬을 위한 플렉스 컨테이너 */
+    justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+    margin-top: 8px; /* 위 요소와 간격 */
+}
+
+/* 버튼 스타일 */
+button {
+    padding: 8px 16px; /* 버튼 내부 여백 */
+    margin-left: 8px; /* 버튼 간 간격 */
+    border: none; /* 기본 테두리 제거 */
+    border-radius: 4px; /* 모서리를 둥글게 */
+    font-size: 14px; /* 텍스트 크기 */
+    cursor: pointer; /* 커서 모양 변경 */
+}
+
+.btn_blue {
+    background-color: #007bff; /* 파란색 배경 */
+    color: #ffffff; /* 흰색 텍스트 */
+}
+
+.btn_blue:hover {
+    background-color: #0056b3; /* 호버 시 어두운 파란색 */
+}
+
+.blind {
+    display: none;
+}
+
+/* 전체 댓글 박스 */
+.comment-box {
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* 댓글 리스트 */
+.cmt-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reply_list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+.cmt-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+
+/* 닉네임, IP, 날짜, 삭제 버튼 한 줄 정렬 */
+
+.reply_box {
+    margin-left:20px;
+
+}
+
+.cmt_info {
+    display: flex; /* 한 줄에 배치 */
+    justify-content: space-between; /* 좌우로 배치 */
+    align-items: flex-start;; /* 수직 가운데 정렬 */
+}
+
+.btn_reply_write_all{
+    cursor:pointer;
+}
+
+.reply_info {
+    display: flex; /* 한 줄에 배치 */
+    justify-content: space-between; /* 좌우로 배치 */
+    align-items: flex-start; /* 수직 가운데 정렬 */
+}
+.reply{
+    background-color:#f0f0f0;
+}
+.cmt_write_box.small {
+    margin-top:0;
+    background-color:#f0f0f0;
+}
+/* 닉네임 및 IP */
+.cmt_nickbox {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    gap: 5px;
+}
+
+.cmt_nickbox .nickname {
+    font-weight: bold;
+    color: #333;
+}
+
+.cmt_nickbox .ip {
+    font-size: 12px;
+    color: #888;
+}
+
+
+.cmt_txtbox {
+    margin-top: 0; /* 위쪽 간격 제거 */
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 0; /* 패딩 제거 */
+    font-size: 14px; /* 글자 크기 */
+    line-height: 1.5; /* 줄 간격 */
+    color: #000; /* 글자 색상 */
+    word-break: break-word; /* 긴 단어 줄바꿈 */
+    width: calc(100% - 40px); /* 부모 컨테이너 대비 고정 너비 (양쪽 마진 고려) */
+    max-width: 600px; /* 필요 시 최대 너비 제한 */
+    box-sizing: border-box; /* 패딩 포함한 크기 계산 */
+}
+
+/* 댓글 본문 */
+.usertxt {
+    margin-top: 0; /* 기본 margin 제거 */
+    margin-left:20px;
+    margin-right:20px;
+    padding: 0; /* 불필요한 패딩 제거 */
+    font-size: 14px; /* 적절한 폰트 크기 설정 */
+    line-height: 1.5; /* 줄 간격 조정 */
+    color: #000; /* 텍스트 색상 */
+    word-break: break-word; /* 긴 단어가 잘리도록 설정 */
+    text-align: left; /* 텍스트를 왼쪽으로 정렬 */
+}
+
+/* 날짜와 삭제 버튼 */
+.fr {
+    display: flex; /* 한 줄 정렬 */
+    gap: 10px;
+}
+
+.date_time {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.delete-button {
+    padding: 8px 16px; /* 버튼 내부 여백 */
+    border: none; /* 테두리 제거 */
+    border-radius: 5px; /* 둥근 모서리 */
+    background-color: #dc143c;
+    color: white; /* 흰색 텍스트 */
+    cursor: pointer; /* 마우스 포인터 표시 */
+    font-size: 14px; /* 글자 크기 */
+}
+
+.delete-button:hover {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.article-content img {
+    max-width: 100%; /* 컨테이너 너비에 맞춤 */
+    height: auto;    /* 비율 유지 */
+}
+
+.edit-button {
+    position: absolute; /* 부모 컨테이너의 위치를 기준으로 배치 */
+    top: 10; /* 위쪽 경계에 고정 */
+    right: 10; /* 오른쪽 경계에 고정 */
+    padding: 8px 16px; /* 버튼 내부 여백 */
+    border: none; /* 테두리 제거 */
+    border-radius: 5px; /* 둥근 모서리 */
+    background-color: #007BFF; /* 파란색 배경 */
+    color: white; /* 흰색 텍스트 */
+    cursor: pointer; /* 마우스 포인터 표시 */
+    font-size: 14px; /* 글자 크기 */
+}
+
+
+
+

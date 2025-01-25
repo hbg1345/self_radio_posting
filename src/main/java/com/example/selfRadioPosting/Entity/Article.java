@@ -2,6 +2,7 @@ package com.example.selfRadioPosting.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 
 import java.text.DateFormat;
@@ -25,18 +26,24 @@ public class Article {
     private String title;
     @Column(columnDefinition = "TEXT")
     private String content;
-    @Column(columnDefinition = "TEXT")
+    @ColumnDefault("0")
+    @Column(columnDefinition = "TEXT", name="video_url")
     private String videoUrl;
-    @Column(columnDefinition = "TEXT")
+    @ColumnDefault("0")
+    @Column(columnDefinition = "TEXT", name="audio_url")
     private String audioUrl;
+    @ColumnDefault("0")
     @Column
     private String created;
     @Column
     private String password;
+    @ColumnDefault("0")
     @Column
     private String ip;
+    @ColumnDefault("0")
     @Column
     private Long views;
+    @ColumnDefault("0")
     @Column
     private Long recommend;
 

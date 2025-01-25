@@ -1,7 +1,11 @@
 package com.example.selfRadioPosting.controller;
 
 import com.example.selfRadioPosting.dto.ArticleDto;
+import com.example.selfRadioPosting.dto.CommentDto;
+import com.example.selfRadioPosting.dto.ReplyDto;
 import com.example.selfRadioPosting.service.ArticleService;
+import com.example.selfRadioPosting.service.CommentService;
+import com.example.selfRadioPosting.service.ReplyService;
 import com.example.selfRadioPosting.service.S3FileService;
 import com.example.selfRadioPosting.util.FileManager;
 import com.example.selfRadioPosting.util.IPManger;
@@ -38,17 +42,28 @@ import static javax.imageio.ImageIO.read;
 public class ArticleController {
     private final S3FileService s3FileService;
     private final ArticleService articleService;
-
+    private final CommentService commentService;
+    private final ReplyService replyService;
     @Autowired
-    ArticleController(S3FileService s3FileService, ArticleService articleService){
+    ArticleController(S3FileService s3FileService, ArticleService articleService,
+                      CommentService commentService, ReplyService replyService){
         this.s3FileService = s3FileService;
         this.articleService = articleService;
+        this.commentService = commentService;
+        this.replyService = replyService;
     }
 
     @GetMapping("/article/show/{id}")
     public String show(@PathVariable Long id, Model model){
         ArticleDto articleDto = articleService.show(id);
+        List<CommentDto> commentDtos = commentService.findAllComments(id);
+
+        for(CommentDto commentDto: commentDtos){
+            List<ReplyDto> replyDtos = replyService.findAllByCommentId(commentDto.getId());
+            commentDto.setReplyDtos(replyDtos);
+        }
         model.addAttribute("article", articleDto);
+        model.addAttribute("comments", commentDtos);
         log.info(articleDto.toString());
         return "/article/show";
     }

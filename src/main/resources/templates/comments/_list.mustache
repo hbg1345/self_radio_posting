@@ -1,0 +1,104 @@
+<div class="comment-box">
+    <ul class="cmt-list">
+        {{#comments}}
+        <li data-comment-id="{{id}}" class="ub-content">
+            <div class="cmt_info clear">
+                <div class="cmt_nickbox">
+                  <span class="gall_writer ub-writer">
+                    <span class="nickname">
+                        <em>{{writer}}</em>
+                        <span class="ip">({{ip}})</span>
+                    </span>
+                  </span>
+                </div>
+                <div class="clear cmt_txtbox btn_reply_write_all" data-comment-id="{{id}}">
+                    <p class="usertxt ub-word">
+                        {{content}}
+                    </p>
+                </div>
+                <div class="fr clear">
+                    <span class="date_time">{{created}}</span>
+                    <div class="cmt_mdf_del" data-type="cmt">
+                        <button type="button" class="comment-delete-btn delete-button">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </li>
+        {{>comments/_new_reply}}
+            <div class="reply show">
+                <div class="reply_box">
+                    <ul class="reply_list">
+                        {{#replyDtos}}
+                        <li data-reply-id="{{id}}" class="ub-content">
+                            <div class="reply_info clear">
+                                <div class="cmt_nickbox">
+                                  <span class="gall_writer ub-writer">
+                                    <span class="nickname">
+                                        <em>ㄴ{{writer}}</em>
+                                        <span class="ip">({{ip}})</span>
+                                    </span>
+                                  </span>
+                                </div>
+                                <div class="clear cmt_txtbox">
+                                    <p class="usertxt ub-word">
+                                        {{content}}
+                                    </p>
+                                </div>
+                                <div class="fr clear">
+                                    <span class="date_time">{{created}}</span>
+                                    <div class="cmt_mdf_del" data-type="rep">
+                                        <button type="button" class="reply-delete-btn delete-button">삭제</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {{/replyDtos}}
+                    </ul>
+                </div>
+            </div>
+        {{/comments}}
+    </ul>
+</div>
+
+<!--답글 삭제-->
+<script>
+{
+    const replyDeleteBtns = document.querySelectorAll(".reply-delete-btn");
+    replyDeleteBtns.forEach(btn=>{
+        btn.addEventListener("click", (event) => {
+        const replyDeleteBtn = event.target;
+        const replyId = replyDeleteBtn.closest('li').getAttribute("data-reply-id");
+        const url = `/api/replies/${replyId}`;
+        fetch(url,{method:"DELETE"}).then(response => {
+            if (!response.ok){
+                alert("답글 삭제 실패");
+                return;
+            }
+            alert(`답글이 삭제되었습니다.`);
+            window.location.reload();});
+        });
+    });
+}
+</script>
+
+<!--댓글 삭제-->
+<script>
+{
+    const commentDeleteBtns = document.querySelectorAll(".comment-delete-btn");
+    commentDeleteBtns.forEach(btn=>{
+        btn.addEventListener("click", (event) => {
+        const commentDeleteBtn = event.target;
+        const commentId = commentDeleteBtn.closest('li').getAttribute("data-comment-id");
+        const url = `/api/comments/${commentId}`;
+        fetch(url,{method:"DELETE"}).then(response => {
+            if (!response.ok){
+                alert("댓글 삭제 실패");
+                return;
+            }
+            alert(`댓글이 삭제되었습니다.`);
+            window.location.reload();});
+        });
+    });
+}
+</script>
+

@@ -1,0 +1,56 @@
+<div class="cmt_write_box clear">
+    <input type="hidden" id="new-comment-article-id" value="{{article.id}}">
+    <div class="f1">
+        <div class="user_info_input">
+            <label for="user_nick" class="blind">닉네임</label>
+            <input type="text" id="new-comment-name" name="name" placeholder="닉네임"
+                   onfocus="this.style.background='#FFFFFF'" maxlength="20" style="background: rgb(255, 255, 255);">
+        </div>
+        <div class="user_info_input">
+            <label for="user_pw" class="blind">비밀번호</label>
+            <input type="password" id="password" name="password" placeholder="비밀번호"
+               onfocus="this.style.background='#FFFFFF'" maxlength="20" style="background: rgb(255, 255, 255);">
+        </div>
+    </div>
+    <div class="cmt_txt_cont">
+        <div class="cmt_write">
+            <label for="cmt_textarea" class="cmt_textarea_label"
+                   onclick="$('.cmt_textarea_label').hide();$(this).siblings('textarea').focus();"
+                   style="display: none;">
+            </label>
+            <textarea id="new-comment-body" maxlength="400"></textarea>
+        </div>
+        <div class="cmt_cont_bottom clear">
+            <div class="fr">
+                <button type="button" id="comment-create-btn" class="btn_blue btn_svc small reply_add">등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+{
+    const commentCreateBtn = document.querySelector("#comment-create-btn");
+    commentCreateBtn.addEventListener("click", function() {
+        const comment = {
+            writer: document.querySelector("#new-comment-name").value,
+            content: document.querySelector("#new-comment-body").value,
+            articleId: document.querySelector("#new-comment-article-id").value,
+            password: document.querySelector("#password").value
+        };
+        const url = "/api/articles/" + comment.articleId + "/comments";
+        fetch(url,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                    },
+                body: JSON.stringify(comment)
+            }).then(response=> {
+                const msg = (response.ok) ? "댓글이 등록되었습니다." : "댓글 등록 과정에서 문제가 발생하였습니다.";
+                alert(msg);
+                window.location.reload();});
+            });
+}
+</script>

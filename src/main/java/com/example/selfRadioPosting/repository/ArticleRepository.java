@@ -18,4 +18,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Modifying
     @Query(value="update article set recommend=recommend+1 where id=:id", nativeQuery = true)
     void recommend(Long id);
+
+    @Modifying
+    @Query(value="update article set content=:content, audio_url=:audioUrl, video_url=:videoUrl where id=:id", nativeQuery = true)
+    void update(Long id, String content, String audioUrl, String videoUrl);
 }
