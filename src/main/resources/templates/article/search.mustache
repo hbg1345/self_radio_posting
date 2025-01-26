@@ -1,0 +1,72 @@
+{{>layouts/header}}
+{{>layouts/categories}}
+<div class="main-container">
+    <div class="search-list">
+        {{#articleList}}
+            <div style="margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #ddd;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 18px; font-weight: bold; color: #333; text-overflow: ellipsis;
+                    white-space: nowrap; overflow: hidden;">
+                        <a href="/article/show/{{id}}" style="text-decoration: none; padding:0;
+                        color: #0056b3; cursor: pointer;">
+                            {{title}} | {{category}}
+                        </a>
+                    </div>
+                    <div style="font-size: 14px; color: #666; margin-left: 10px; white-space: nowrap;">
+                        글쓴이: {{writer}} ({{ip}})
+                    </div>
+                </div>
+                <!-- 추가 정보 -->
+                <div style="font-size: 14px; color: #666; margin: 5px 0;">
+                    {{created}} | 조회수: {{views}} | 추천수: {{recommend}}
+                </div>
+                <!-- 내용 -->
+                <div class="article-content" style="font-size: 16px; line-height: 1.5; color: #444; margin-top: 8px;">
+                    {{content}}
+                </div>
+            </div>
+        {{/articleList}}
+    </div>
+</div>
+
+
+<div class="pagination ">
+    {{#hasPrev}}
+        <a href="/article/search?search-keyword={{keyword}}&page={{startPage}}">&laquo;</a>
+    {{/hasPrev}}
+    {{#pages}}
+        <a data-page-num="{{.}}" href="/article/search?search-keyword={{keyword}}&page={{.}}">{{.}}</a>
+    {{/pages}}
+    {{#hasNext}}
+        <a href="/article/search?search-keyword={{keyword}}&page={{endPage}}">&raquo;</a>
+    {{/hasNext}}
+</div>
+
+<script>
+    {
+        var as = document.querySelectorAll(".pagination a");
+        as.forEach(a=> {
+            if (a.getAttribute("data-page-num") == {{nowPage}}){
+                a.style.color = "#006cb7";
+                a.style.textDecoration = "underline";
+            }
+        });
+    }
+</script>
+
+
+<footer>
+    <p>© 나만의 라디오를 만들어 보세요!</p>
+</footer>
+</body>
+</html>
+
+<script>
+    document.querySelectorAll('.article-content').forEach(content => {
+        const text = content.textContent.trim();
+        if (text.length > 100) {
+            content.textContent = text.substring(0, 100) + '...';
+        }
+    });
+</script>

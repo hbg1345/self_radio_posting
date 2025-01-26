@@ -1,4 +1,12 @@
  /* 기존 스타일 */
+
+a {
+    color: black;
+    float: center;
+    padding: 8px 8px;
+    text-decoration: none;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -76,7 +84,7 @@ nav a:hover {
     gap: 10px;
 }
 .tab-buttons button {
-    padding: 10px 20px;
+    padding: 5px 5px;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
     cursor: pointer;
@@ -402,6 +410,16 @@ button {
     font-size: 14px; /* 글자 크기 */
 }
 
+.pagination {
+    display:flex;
+    justify-content: center;
+}
 
+.pagination a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+}
 
 

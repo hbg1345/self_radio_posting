@@ -17,6 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +30,15 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.*;
 
+import static com.google.common.primitives.Ints.min;
 import static javax.imageio.ImageIO.read;
 
 @Slf4j
@@ -84,8 +88,8 @@ public class ArticleController {
     }
 
     @GetMapping("/article/recommend/{id}")
-    public String recommend(@PathVariable Long id) {
-        articleService.recommend(id);
+    public String recommend(@PathVariable Long id, HttpServletRequest request) throws UnknownHostException, ParseException {
+        articleService.recommend(id, request);
         return "redirect:/article/show/" + id;
     }
 
@@ -96,6 +100,97 @@ public class ArticleController {
         List<ArticleDto> articleList = articleService.findAllByCategory(category);
         model.addAttribute("articleList", articleList);
         return "/article/test";
+    }
+
+    @GetMapping("/article/page_test/{category}")
+    public String pageTest(@PathVariable String category, Model model,
+                            @RequestParam(value="page", defaultValue="0") int page)
+    {
+        int pageSize = 5;
+        Page<ArticleDto> articleList = articleService.findSomeByCategory(category, page, pageSize, "created");
+        int startPage = page / pageSize * pageSize;
+        int total = articleList.getTotalPages();
+        int endPage = Math.min(startPage + pageSize, total);
+
+        boolean hasPrev = startPage != 0;
+        boolean hasNext = endPage != total;
+
+        List<Integer> pages = new ArrayList<Integer>();
+        for (int i = startPage; i < endPage; i++) {
+            pages.add(i);
+        }
+
+        model.addAttribute("url", "/article/page_test/"+category+"?");
+        model.addAttribute("nowPage", page);
+        model.addAttribute("startPage", startPage-1);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("hasPrev", hasPrev);
+        model.addAttribute("hasNext", hasNext);
+        model.addAttribute("pages", pages);
+        model.addAttribute("articleList", articleList);
+        model.addAttribute("category", category);
+        model.addAttribute("kind", "total-posts");
+        return "/article/page_test";
+    }
+
+    @GetMapping("/article/page_test/{category}/popular")
+    public String pageTestPopular(@PathVariable String category, Model model,
+                            @RequestParam(value="page", defaultValue="0") int page)
+    {
+        int pageSize = 4;
+        Page<ArticleDto> articleList = articleService.findSomeByCategory(category, page, pageSize, "recommend");
+        int startPage = page / pageSize * pageSize;
+        int total = articleList.getTotalPages();
+        int endPage = Math.min(startPage + pageSize, total);
+
+        boolean hasPrev = startPage != 0;
+        boolean hasNext = endPage != total;
+
+        List<Integer> pages = new ArrayList<Integer>();
+        for (int i = startPage; i < endPage; i++) {
+            pages.add(i);
+        }
+
+        model.addAttribute("url", "/article/page_test/"+category + "/popular?");
+        model.addAttribute("nowPage", page);
+        model.addAttribute("startPage", startPage-1);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("hasPrev", hasPrev);
+        model.addAttribute("hasNext", hasNext);
+        model.addAttribute("pages", pages);
+        model.addAttribute("articleList", articleList);
+        model.addAttribute("category", category);
+
+        model.addAttribute("kind", "popular-posts");
+        return "/article/page_test";
+    }
+
+    @GetMapping("/article/search")
+    public String search(@RequestParam(value="search-keyword") String keyword, Model model,
+                         @RequestParam(value="page", defaultValue="0") int page){
+        int pageSize = 4;
+        Page<ArticleDto> articleList = articleService.findSomeByKeyword(keyword, page, pageSize, "created");
+        int startPage = page / pageSize * pageSize;
+        int total = articleList.getTotalPages();
+        int endPage = Math.min(startPage + pageSize, total);
+
+        boolean hasPrev = startPage != 0;
+        boolean hasNext = endPage != total;
+
+        List<Integer> pages = new ArrayList<Integer>();
+        for (int i = startPage; i < endPage; i++) {
+            pages.add(i);
+        }
+
+        model.addAttribute("nowPage", page);
+        model.addAttribute("startPage", startPage-1);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("hasPrev", hasPrev);
+        model.addAttribute("hasNext", hasNext);
+        model.addAttribute("pages", pages);
+        model.addAttribute("articleList", articleList);
+        model.addAttribute("keyword", keyword);
+        return "/article/search";
     }
 
     @PostMapping("/submit/{category}")

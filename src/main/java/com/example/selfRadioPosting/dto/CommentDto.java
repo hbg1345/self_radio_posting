@@ -2,6 +2,7 @@ package com.example.selfRadioPosting.dto;
 
 import com.example.selfRadioPosting.Entity.Article;
 import com.example.selfRadioPosting.Entity.Comment;
+import com.example.selfRadioPosting.util.IPManger;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import lombok.*;
@@ -31,7 +32,7 @@ public class CommentDto {
                 comment.getArticle().getId(),
                 comment.getContent(),
                 comment.getWriter(),
-                comment.getIp(),
+                IPManger.sliceIp(comment.getIp()),
                 comment.getPassword(),
                 comment.getCreated(),
                 null

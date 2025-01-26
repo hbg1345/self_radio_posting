@@ -11,6 +11,13 @@ public class IPManger {
     private IPManger() {
         // 인스턴스화 방지
     }
+    public static String sliceIp(String ip){
+        String[] parts = ip.split("\\.");
+        if (parts.length < 2)
+            return ip;
+        return parts[0] + "." + parts[1];
+    }
+
     public static String getClientIp(HttpServletRequest request) throws UnknownHostException {
         String ip = request.getHeader("X-Forwarded-For");
         log.info("X-FORWARDED-FOR : " + ip);

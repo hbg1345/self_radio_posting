@@ -1,0 +1,83 @@
+{{>layouts/header}}
+{{>layouts/categories}}
+<div class="main-container">
+    <div class="gallery-header">
+        <h2>{{category}}</h2>
+    </div>
+    <div class="tab-menu">
+        <div class="tab-buttons">
+            <button id="total-posts"><a href="/article/page_test/{{category}}">전체포스팅</a></button>
+            <button id="popular-posts"><a href="/article/page_test/{{category}}/popular">인기포스팅</a></button>
+        </div>
+        <a href="/post/{{category}}" class="write-button">글쓰기</a>
+    </div>
+    <table style="table-layout: fixed; width: 100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th style="width:400px">제목</th>
+            <th>글쓴이</th>
+            <th>작성일</th>
+            <th>조회</th>
+            <th>추천</th>
+        </tr>
+        </thead>
+        {{#articleList}}
+            <tbody>
+            <tr>
+                <td style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;"><a href="/article/show/{{id}}">{{title}}</a></td>
+                <td  style="word-wrap: break-word;
+                        overflow-wrap: break-word;
+                        white-space: normal;">{{writer}}({{ip}})</td>
+                <td>{{created}}</td>
+                <td>{{views}}</td>
+                <td>{{recommend}}</td>
+            </tr>
+            </tbody>
+        {{/articleList}}
+    </table>
+</div>
+<div class="pagination ">
+    {{#hasPrev}}
+    <a href="{{url}}page={{startPage}}">&laquo;</a>
+    {{/hasPrev}}
+    {{#pages}}
+    <a data-page-num="{{.}}" href="{{url}}page={{.}}">{{.}}</a>
+    {{/pages}}
+    {{#hasNext}}
+    <a href="{{url}}page={{endPage}}">&raquo;</a>
+    {{/hasNext}}
+</div>
+
+<script>
+    {
+        var as = document.querySelectorAll(".pagination a");
+        as.forEach(a=> {
+            if (a.getAttribute("data-page-num") == {{nowPage}}){
+                a.style.color = "#006cb7";
+                a.style.textDecoration = "underline";
+            }
+        });
+    }
+</script>
+
+
+<footer>
+    <p>© 나만의 라디오를 만들어 보세요!</p>
+</footer>
+</body>
+
+<script>
+    {
+        tBtn = document.querySelector("#total-posts");
+        pBtn = document.querySelector("#popular-posts");
+        if ("{{kind}}" == "total-posts"){
+            tBtn.className = "active";
+            pBtn.className = "none";
+        }
+        else {
+            pBtn.className = "active";
+            tBtn.className = "none";
+        }
+    }
+</script>
+</html>

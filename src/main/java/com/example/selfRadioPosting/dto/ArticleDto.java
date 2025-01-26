@@ -1,6 +1,7 @@
 package com.example.selfRadioPosting.dto;
 
 import com.example.selfRadioPosting.Entity.Article;
+import com.example.selfRadioPosting.util.IPManger;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +39,7 @@ public class ArticleDto {
                 article.getAudioUrl(),
                 article.getCreated(),
                 article.getPassword(),
-                article.getIp(),
+                IPManger.sliceIp(article.getIp()),
                 article.getViews(),
                 article.getRecommend());
     }

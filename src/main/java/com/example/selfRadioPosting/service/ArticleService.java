@@ -1,10 +1,14 @@
 package com.example.selfRadioPosting.service;
 
 import com.example.selfRadioPosting.Entity.Article;
+import com.example.selfRadioPosting.Entity.Recommend;
 import com.example.selfRadioPosting.dto.ArticleDto;
 import com.example.selfRadioPosting.repository.ArticleRepository;
+import com.example.selfRadioPosting.repository.RecommendRepository;
 import com.example.selfRadioPosting.util.FileManager;
+import com.example.selfRadioPosting.util.IPManger;
 import com.example.selfRadioPosting.util.SubtitleAdder;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +17,10 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,16 +41,19 @@ import java.util.regex.Pattern;
 @Service
 public class ArticleService {
     private ArticleRepository articleRepository;
+    private RecommendRepository recommendRepository;
     private AudioService audioService;
     private S3FileService s3FileService;
 
     @Autowired
     ArticleService(ArticleRepository articleRepository,
                    AudioService audioService,
-                   S3FileService s3FileService){
+                   S3FileService s3FileService,
+                   RecommendRepository recommendRepository){
         this.audioService = audioService;
         this.articleRepository = articleRepository;
         this.s3FileService = s3FileService;
+        this.recommendRepository = recommendRepository;
     }
 
     private static void extractTexts(Node node, LinkedList<String> texts,
@@ -198,7 +213,43 @@ public class ArticleService {
     }
 
     @Transactional
-    public void recommend(Long id) {
-        articleRepository.recommend(id);
+    public boolean recommend(Long id, HttpServletRequest request) throws UnknownHostException, ParseException {
+        String ip = IPManger.getClientIp(request);
+        List<Recommend> recommends = recommendRepository.findAllByIdAndIp(id, ip);
+        Article article = articleRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        DateFormat outputFormatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        Date nowDate = new Date();
+
+        boolean ok = false;
+        if (recommends.isEmpty()){
+            ok = true;
+            Recommend recommend = new Recommend(null, article, ip, null);
+            recommendRepository.save(recommend);
+        }
+        else {
+            Date recommendDate = outputFormatter.parse(recommends.get(0).getRecommendDate());
+            long diff = nowDate.getTime() - recommendDate.getTime();
+            if (diff > 24*60*60*1000) {
+                ok = true;
+                recommendRepository.update(recommends.get(0).getId(), outputFormatter.format(nowDate));
+            }
+        }
+        if (ok)
+            articleRepository.recommend(id);
+        return ok;
+    }
+
+    public Page<ArticleDto> findSomeByCategory(String category, int page, int pageSize, String attr) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc(attr));
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sorts));
+        return articleRepository.findByCategory(category, pageable).map(ArticleDto::createDto);
+    }
+
+    public Page<ArticleDto> findSomeByKeyword(String keyword, int page, int pageSize, String attr) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc(attr));
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sorts));
+        return articleRepository.findByKeyword(keyword, pageable).map(ArticleDto::createDto);
     }
 }

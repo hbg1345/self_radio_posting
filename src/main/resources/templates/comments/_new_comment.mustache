@@ -33,12 +33,24 @@
 {
     const commentCreateBtn = document.querySelector("#comment-create-btn");
     commentCreateBtn.addEventListener("click", function() {
+
         const comment = {
             writer: document.querySelector("#new-comment-name").value,
             content: document.querySelector("#new-comment-body").value,
             articleId: document.querySelector("#new-comment-article-id").value,
             password: document.querySelector("#password").value
         };
+
+        if (!comment.writer || !comment.content) {
+            alert("닉네임과 내용을 모두 입력해주세요.");
+            return;
+        }
+
+        if (comment.password.length < 2 || comment.password.length > 255){
+            alert("비밀번호를 2자 이상 입력해주세요.");
+            return;
+        }
+
         const url = "/api/articles/" + comment.articleId + "/comments";
         fetch(url,
             {

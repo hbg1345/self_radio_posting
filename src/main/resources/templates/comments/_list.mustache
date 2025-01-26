@@ -2,6 +2,7 @@
     <ul class="cmt-list">
         {{#comments}}
         <li data-comment-id="{{id}}" class="ub-content">
+            <input type="hidden" name="ans" value="{{password}}">
             <div class="cmt_info clear">
                 <div class="cmt_nickbox">
                   <span class="gall_writer ub-writer">
@@ -17,10 +18,11 @@
                     </p>
                 </div>
                 <div class="fr clear">
-                    <span class="date_time">{{created}}</span>
+                    <span class="date_time">{{created}}  <input style="width:60px; display:block; padding:0; " type="password" name="password" placeholder="비밀번호"></span>
                     <div class="cmt_mdf_del" data-type="cmt">
                         <button type="button" class="comment-delete-btn delete-button">삭제</button>
                     </div>
+
                 </div>
             </div>
         </li>
@@ -30,6 +32,7 @@
                     <ul class="reply_list">
                         {{#replyDtos}}
                         <li data-reply-id="{{id}}" class="ub-content">
+                            <input type="hidden" name="ans" value="{{password}}">
                             <div class="reply_info clear">
                                 <div class="cmt_nickbox">
                                   <span class="gall_writer ub-writer">
@@ -45,8 +48,8 @@
                                     </p>
                                 </div>
                                 <div class="fr clear">
-                                    <span class="date_time">{{created}}</span>
-                                    <div class="cmt_mdf_del" data-type="rep">
+                                    <span class="date_time">{{created}}  <input style="width:60px; display:block; padding:0; " type="password" name="password" placeholder="비밀번호"></span>
+                                    <div class="cmt_mdf_del">
                                         <button type="button" class="reply-delete-btn delete-button">삭제</button>
                                     </div>
                                 </div>
@@ -67,6 +70,12 @@
     replyDeleteBtns.forEach(btn=>{
         btn.addEventListener("click", (event) => {
         const replyDeleteBtn = event.target;
+        const ans = replyDeleteBtn.closest('li').querySelector('[name="ans"]').value;
+        const inputPassword = replyDeleteBtn.closest('li').querySelector('[name="password"]').value;
+        if (ans != inputPassword){
+            alert("패스워드가 다릅니다.");
+            return;
+        }
         const replyId = replyDeleteBtn.closest('li').getAttribute("data-reply-id");
         const url = `/api/replies/${replyId}`;
         fetch(url,{method:"DELETE"}).then(response => {
@@ -88,6 +97,12 @@
     commentDeleteBtns.forEach(btn=>{
         btn.addEventListener("click", (event) => {
         const commentDeleteBtn = event.target;
+        const ans = commentDeleteBtn.closest('li').querySelector('[name="ans"]').value;
+        const inputPassword = commentDeleteBtn.closest('li').querySelector('[name="password"]').value;
+        if (ans != inputPassword){
+            alert("패스워드가 다릅니다.");
+            return;
+        }
         const commentId = commentDeleteBtn.closest('li').getAttribute("data-comment-id");
         const url = `/api/comments/${commentId}`;
         fetch(url,{method:"DELETE"}).then(response => {

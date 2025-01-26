@@ -42,6 +42,16 @@
                 password: writeBox.querySelector('input[name="reply-password"]').value
             };
 
+            if (!reply.writer || !reply.content) {
+                alert("닉네임과 내용을 모두 입력해주세요.");
+                return;
+            }
+
+            if (reply.password.length < 2 || reply.password.length > 255){
+                alert("비밀번호를 2자 이상 입력해주세요.");
+                return;
+            }
+
             const url = "/api/comments/" + commentId + "/replies";
             fetch(url,
                 {

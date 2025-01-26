@@ -3,6 +3,7 @@ package com.example.selfRadioPosting.dto;
 import com.example.selfRadioPosting.Entity.Article;
 import com.example.selfRadioPosting.Entity.Comment;
 import com.example.selfRadioPosting.Entity.Reply;
+import com.example.selfRadioPosting.util.IPManger;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +28,7 @@ public class ReplyDto {
                 reply.getComment().getId(),
                 reply.getContent(),
                 reply.getWriter(),
-                reply.getIp(),
+                IPManger.sliceIp(reply.getIp()),
                 reply.getPassword(),
                 reply.getCreated()
         );

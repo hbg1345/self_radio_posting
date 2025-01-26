@@ -10,7 +10,7 @@
     <!-- 글 내용 표시 -->
     <div class="article-container" style="position: relative;">
         <div class="article-header" style="position: relative;">
-            <h2 class="article-title" style="display: inline-block; margin: 0;">{{article.title}}</h2>
+            <h2 class="article-title" style="display: inline-block; margin: 0; width:80%;">{{article.title}}</h2>
             <!-- 모달 구조 -->
             <div
                     id="modal"
@@ -44,7 +44,7 @@
             작성자: {{article.writer}}({{article.ip}}) | 작성일:{{article.created}} | 조회수: {{article.views}} | 추천수: {{article.recommend}}
         </p>
 
-        <div class="article-content" >
+        <div class="article-content" style="word-break:break-all;">
             {{{article.content}}}<!-- HTML 내용 렌더링 -->
             <br>
             <video id="myVideo" width="600" controls>
@@ -68,7 +68,6 @@
                     border-radius: 50%;"
                 onmouseover="this.style.backgroundColor='#45a049';"
                 onmouseout="this.style.backgroundColor='#4CAF50';"
-                onclick="location.href='/article/recommend/{{article.id}}'"
             >추천</button>
     </div>
     {{>comments/_comments}}
@@ -150,6 +149,36 @@
             alert("잘못된 비밀번호입니다.");
         }
     });
+</script>
+
+<script>
+{
+    const Btn = document.querySelector("#recommendButton");
+    Btn.addEventListener('click', function() {
+        const form = {
+            id: {{article.id}}
+        };
+
+        const url = "/api/articles/recommend";
+        fetch(url,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                    },
+                body: JSON.stringify(form)
+            }).then(response=> {
+                if(!response.ok){
+                    alert("하루에 한 번만 추천할 수 있습니다.");
+                    return;
+                }
+                else {
+                    alert("이 게시글을 추천하였습니다.");
+                    window.location.reload();
+                }
+            });
+    });
+}
 </script>
 </body>
 </html>

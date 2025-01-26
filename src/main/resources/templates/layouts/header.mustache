@@ -9,8 +9,15 @@
 <body>
 <header>
     <h1> <a href="/" class="white-link"> 셀프 라디오 </a> </h1>
+
     <div class="search-bar">
-        <input type="text" placeholder="통합 검색">
-        <button>검색</button>
+        <form action="/article/search" method="get">
+            <input name="search-keyword" type="text" placeholder="통합 검색">
+            <input type="submit" value="검색">
+        </form>
     </div>
 </header>
+
+
+
+

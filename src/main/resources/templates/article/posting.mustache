@@ -51,7 +51,7 @@
                     style="padding: 10px 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f8f9fa; cursor: pointer;">
                 취소
             </button>
-            <button type="button" class="submit-btn" onclick="prepareForm()"
+            <button type="button" id="submit" class="submit-btn" onclick="prepareForm()"
                     style="padding: 10px 20px; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;">
                 등록
             </button>
@@ -104,11 +104,12 @@
 
     function cancelForm() {
         if (confirm("작성 중인 내용을 취소하시겠습니까?")) {
-            window.location.href = "/article/test/{{category}}";
+            window.location.href = "/article/page_test/{{category}}";
         }
     }
 
-    function prepareForm() {
+    function prepareForm(event) {
+
         const title = document.getElementById("title").value.trim();
         const writer = document.getElementById("writer").value.trim();
         const password = document.getElementById("password").value.trim();
@@ -134,7 +135,9 @@
         formData.append("writer", writer);
         formData.append("content", content);
         formData.append("password", password);
+        btn = document.querySelector("#submit");
 
+        btn.disabled = "true";
         fetch('/submit/{{category}}', {
             method: 'POST',
             body: formData
@@ -147,12 +150,13 @@
             })
             .then(data => {
                 alert(data.message);
-                window.location.href = data.redirectUrl;
+                window.location.href = "/article/page_test/{{category}}"
             })
             .catch(error => {
                 console.error("Error:", error.message);
                 alert("등록에 실패했습니다.");
             });
+        btn.disabled = "false";
     }
 </script>
 </body>
