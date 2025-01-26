@@ -7,4 +7,12 @@
 이미지와 글을 함께 올리면 이미지에 자막이 추가된 비디오가 생성됩니다. 구글 tts api를 사용하여 자막이 비디오의 음성으로 재생됩니다. 
 
 아래 주소로 접속할 수 있습니다.
-http://43.202.234.145:8080/
+http://43.202.234.145:8080/ (현재 홈페이지 외에 404가 뜨는 버그가 있습니다.)
+
+사용한 기술 스택
+- JAVA spring boot
+- JavaScript
+- Amazon s3 저장소
+- Postgres 데이터 베이스
+- Google text-to-speech api
+- Amazon Lightsail 서버
