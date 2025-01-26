@@ -69,7 +69,7 @@ public class ArticleController {
         model.addAttribute("article", articleDto);
         model.addAttribute("comments", commentDtos);
         log.info(articleDto.toString());
-        return "/article/show";
+        return "article/show";
     }
 
     @GetMapping("/article/edit/{id}")
@@ -77,7 +77,7 @@ public class ArticleController {
         ArticleDto articleDto = articleService.show(id);
         model.addAttribute("article", articleDto);
         log.info(articleDto.toString());
-        return "/article/edit";
+        return "article/edit";
     }
 
     @GetMapping("/article/delete/{id}")
@@ -99,13 +99,14 @@ public class ArticleController {
         model.addAttribute("category", category);
         List<ArticleDto> articleList = articleService.findAllByCategory(category);
         model.addAttribute("articleList", articleList);
-        return "/article/test";
+        return "article/test";
     }
 
     @GetMapping("/article/page_test/{category}")
     public String pageTest(@PathVariable String category, Model model,
                             @RequestParam(value="page", defaultValue="0") int page)
     {
+
         int pageSize = 5;
         Page<ArticleDto> articleList = articleService.findSomeByCategory(category, page, pageSize, "created");
         int startPage = page / pageSize * pageSize;
@@ -130,7 +131,7 @@ public class ArticleController {
         model.addAttribute("articleList", articleList);
         model.addAttribute("category", category);
         model.addAttribute("kind", "total-posts");
-        return "/article/page_test";
+        return "article/page_test";
     }
 
     @GetMapping("/article/page_test/{category}/popular")
@@ -162,7 +163,7 @@ public class ArticleController {
         model.addAttribute("category", category);
 
         model.addAttribute("kind", "popular-posts");
-        return "/article/page_test";
+        return "article/page_test";
     }
 
     @GetMapping("/article/search")
@@ -190,7 +191,7 @@ public class ArticleController {
         model.addAttribute("pages", pages);
         model.addAttribute("articleList", articleList);
         model.addAttribute("keyword", keyword);
-        return "/article/search";
+        return "article/search";
     }
 
     @PostMapping("/submit/{category}")

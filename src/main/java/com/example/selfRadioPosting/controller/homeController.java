@@ -22,6 +22,6 @@ public class homeController {
     @GetMapping("/post/{category}")
     public String post(@PathVariable String category, Model model) {
         model.addAttribute("category", category);
-        return "/article/posting";
+        return "article/posting";
     }
 }
