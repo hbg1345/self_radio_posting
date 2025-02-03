@@ -23,8 +23,25 @@ import static javax.imageio.ImageIO.read;
 public class SubtitleAdder {
     private static final int targetHeight = 600;
     private static final int targetWidth = 600;
-    private static final Font font = new Font("맑은 고딕", Font.BOLD, 30);
+    private static final Font font;
+
+    // 서버 실행 코드
+    static {
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, new File("/home/ubuntu/NanumGothic.ttf")).deriveFont(30f);
+        } catch (FontFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //    로컬 실행 코드
+    //    private static final Font font = new Font("맑은 고딕", Font.BOLD, 30);
     private static final Color fontColor = Color.WHITE;
+
+    public SubtitleAdder() throws IOException, FontFormatException {
+    }
 
     static ArrayList<String> splitString(String inputString){
         ArrayList<String> strings = new ArrayList<>();
